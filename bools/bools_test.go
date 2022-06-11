@@ -12,12 +12,12 @@ func TestAnd(t *testing.T) {
 		expectedOutcome bool
 		testId          string
 	}{
-		{expectedOutcome: false, testId: "1", input: []bool{false}},
-		{expectedOutcome: false, testId: "2", input: []bool{false, true, true}},
-		{expectedOutcome: false, testId: "3", input: []bool{false, true, true}},
-		{expectedOutcome: false, testId: "4", input: []bool{}},
-		{expectedOutcome: true, testId: "5", input: []bool{true, true, true}},
-		{expectedOutcome: true, testId: "6", input: []bool{true}},
+		{expectedOutcome: false, testId: "single false", input: []bool{false}},
+		{expectedOutcome: false, testId: "single false and multiple true", input: []bool{false, true, true}},
+		{expectedOutcome: false, testId: "multiple false and single true", input: []bool{false, true, false}},
+		{expectedOutcome: false, testId: "empty", input: []bool{}},
+		{expectedOutcome: true, testId: "all true", input: []bool{true, true, true}},
+		{expectedOutcome: true, testId: "single true", input: []bool{true}},
 	}
 
 	for _, test := range tests {
@@ -33,12 +33,12 @@ func TestOr(t *testing.T) {
 		expectedOutcome bool
 		testId          string
 	}{
-		{expectedOutcome: false, testId: "1", input: []bool{false}},
-		{expectedOutcome: true, testId: "2", input: []bool{false, true, true}},
-		{expectedOutcome: true, testId: "3", input: []bool{false, true, true}},
-		{expectedOutcome: false, testId: "4", input: []bool{}},
-		{expectedOutcome: true, testId: "5", input: []bool{true, true, true}},
-		{expectedOutcome: true, testId: "6", input: []bool{true}},
+		{expectedOutcome: false, testId: "single false", input: []bool{false}},
+		{expectedOutcome: true, testId: "single false and multiple true", input: []bool{false, true, true}},
+		{expectedOutcome: true, testId: "multiple false and single true", input: []bool{false, true, false}},
+		{expectedOutcome: false, testId: "empty", input: []bool{}},
+		{expectedOutcome: true, testId: "all true", input: []bool{true, true, true}},
+		{expectedOutcome: true, testId: "single true", input: []bool{true}},
 	}
 
 	for _, test := range tests {
