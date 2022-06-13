@@ -297,3 +297,16 @@ func TestRight(t *testing.T) {
 	assert.Equal(t, "bc", Right("abc", 2))
 	assert.Equal(t, "abc", Right("abc", 4))
 }
+
+func TestRotate(t *testing.T) {
+	assert.Equal(t, "cab", Rotate("abc", 1))
+	assert.Equal(t, "bca", Rotate("abc", 2))
+	assert.Equal(t, "abc", Rotate("abc", 3))
+	assert.Equal(t, "cab", Rotate("abc", 4))
+	assert.Equal(t, "abc", Rotate("abc", 0))
+	assert.Equal(t, "bca", Rotate("abc", -1))
+	assert.Equal(t, "cab", Rotate("abc", -2))
+	assert.Equal(t, "abc", Rotate("abc", -3))
+	assert.Equal(t, "bca", Rotate("abc", -4))
+	assert.Equal(t, "", Rotate("", -4))
+}

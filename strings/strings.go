@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"math"
 	"regexp"
 	"strings"
 
@@ -304,4 +305,36 @@ func Right(original string, length int) string {
 	}
 
 	return original[len(original)-length:]
+}
+
+func Rotate(original string, shift int) string {
+	if len(original) == 0 {
+		return original
+	}
+
+	shiftAbs := math.Abs(float64(shift))
+
+	if int(shiftAbs) > len(original) {
+		shift = shift % len(original)
+	}
+
+	chars := strings.Split(original, "")
+	shifted := make([]string, len(chars))
+
+	for index, char := range chars {
+		newPosition := index + shift
+
+		if newPosition >= 0 && newPosition < len(chars) {
+			shifted[newPosition] = char
+		} else if newPosition >= len(chars) {
+			correctedPosition := newPosition - len(chars)
+			shifted[correctedPosition] = char
+		} else if newPosition < 0 {
+			correctedPosition := len(chars) + newPosition
+			shifted[correctedPosition] = char
+		}
+	}
+
+	return strings.Join(shifted, "")
+
 }
