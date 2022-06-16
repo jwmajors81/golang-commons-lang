@@ -54,13 +54,22 @@ func HasSuffixIgnoreCase(value string, suffix string) bool {
 
 func Capitalize(value string) string {
 	firstLetter := Substr(value, 0, 1)
-	restOfValue := SubstrLeft(value, 1)
+	restOfValue := SubstrRight(value, 1)
 
 	return strings.ToUpper(firstLetter) + restOfValue
 }
 
-func SubstrLeft(input string, start int) string {
+func SubstrRight(input string, start int) string {
 	return Substr(input, start, len(input)-start)
+}
+
+func SubstrLeft(input string, end int) string {
+	if end <= 0 {
+		return ""
+	}
+
+	end = sorted.Min(len(input), end)
+	return Substr(input, 0, end)
 }
 
 func Substr(input string, start int, length int) string {
@@ -87,7 +96,7 @@ func Chop(input string) string {
 
 	ret := Substr(input, 0, newLength)
 	lastCharacter := Substr(input, newLength, 1)
-	if lastCharacter == LF && SubstrLeft(ret, newLength-1) == CR {
+	if lastCharacter == LF && SubstrRight(ret, newLength-1) == CR {
 		return Substr(ret, 0, newLength-1)
 	}
 
@@ -336,5 +345,62 @@ func Rotate(original string, shift int) string {
 	}
 
 	return strings.Join(shifted, "")
+}
 
+func StartsWith(searchFor string, searchIn string, ignoreCase bool) bool {
+	if len(searchFor) == 0 {
+		return false
+	}
+
+	if len(searchFor) > len(searchIn) {
+		return false
+	}
+
+	if ignoreCase {
+		searchFor = strings.ToLower(searchFor)
+		searchIn = strings.ToLower(searchIn)
+	}
+
+	for i := 0; i < len(searchFor); i++ {
+		lookingFor := searchFor[i]
+		actual := searchIn[i]
+
+		if lookingFor != actual {
+			return false
+		}
+	}
+	return true
+}
+
+func SubstrAfter(original string, separator rune) string {
+	index := strings.IndexRune(original, separator)
+
+	if index < 0 {
+		return ""
+	}
+
+	return SubstrRight(original, index+1)
+}
+
+func SubstrAfterLast(original string, separator rune) string {
+
+	index := strings.LastIndexFunc(original, func(compareTo rune) bool {
+		return compareTo == separator
+	})
+
+	if index < 0 {
+		return ""
+	}
+
+	return SubstrRight(original, index+1)
+}
+
+func SubstrBefore(original string, separator rune) string {
+	index := strings.IndexRune(original, separator)
+
+	if index < 0 {
+		return ""
+	}
+
+	return SubstrLeft(original, index)
 }

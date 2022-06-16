@@ -164,11 +164,44 @@ func TestCapitalize(t *testing.T) {
 	assert.Equal(t, Capitalize("'cat'"), "'cat'")
 }
 
-func TestSubstring(t *testing.T) {
-	assert.Equal(t, "abc", SubstrLeft("abc", 0))
-	assert.Equal(t, "bc", SubstrLeft("abc", 1))
-	assert.Equal(t, "", SubstrLeft("abc", 5))
+func TestSubstrLeft(t *testing.T) {
+	assert.Equal(t, "", SubstrLeft("abc", 0))
+	assert.Equal(t, "a", SubstrLeft("abc", 1))
+	assert.Equal(t, "abc", SubstrLeft("abc", 5))
 	assert.Equal(t, "", SubstrLeft("", 2))
+}
+
+func TestSubstrRight(t *testing.T) {
+	assert.Equal(t, "abc", SubstrRight("abc", 0))
+	assert.Equal(t, "bc", SubstrRight("abc", 1))
+	assert.Equal(t, "", SubstrRight("abc", 5))
+	assert.Equal(t, "", SubstrRight("", 2))
+}
+
+func TestSubstrBefore(t *testing.T) {
+	assert.Equal(t, "", SubstrBefore("", 'a'))
+	assert.Equal(t, "", SubstrBefore("abc", 'a'))
+	assert.Equal(t, "ab", SubstrBefore("abcba", 'c'))
+	assert.Equal(t, "ab", SubstrBefore("abc", 'c'))
+	assert.Equal(t, "", SubstrBefore("abcba", 'a'))
+	assert.Equal(t, "", SubstrBefore("abcba", 'd'))
+}
+
+func TestSubstrAfter(t *testing.T) {
+	assert.Equal(t, "", SubstrAfter("", 'a'))
+	assert.Equal(t, "bc", SubstrAfter("abc", 'a'))
+	assert.Equal(t, "ba", SubstrAfter("abcba", 'c'))
+	assert.Equal(t, "", SubstrAfter("abc", 'c'))
+	assert.Equal(t, "", SubstrAfter("abcba", 'd'))
+}
+
+func TestSubstrAfterLast(t *testing.T) {
+	assert.Equal(t, "", SubstrAfterLast("", 'a'))
+	assert.Equal(t, "bc", SubstrAfterLast("abc", 'a'))
+	assert.Equal(t, "a", SubstrAfterLast("abcba", 'b'))
+	assert.Equal(t, "a", SubstrAfterLast("abcbacba", 'b'))
+	assert.Equal(t, "", SubstrAfterLast("abc", 'c'))
+	assert.Equal(t, "", SubstrAfterLast("abcba", 'd'))
 }
 
 func TestSubstringWithLength(t *testing.T) {
@@ -309,4 +342,15 @@ func TestRotate(t *testing.T) {
 	assert.Equal(t, "abc", Rotate("abc", -3))
 	assert.Equal(t, "bca", Rotate("abc", -4))
 	assert.Equal(t, "", Rotate("", -4))
+}
+
+func TestStartsWith(t *testing.T) {
+	assert.False(t, StartsWith("", "", false))
+	assert.False(t, StartsWith("", "abc", false))
+	assert.False(t, StartsWith("", "ABC", true))
+	assert.False(t, StartsWith("abcde", "", false))
+	assert.False(t, StartsWith("ABC", "abc", false))
+	assert.True(t, StartsWith("ABC", "abc", true))
+	assert.True(t, StartsWith("a", "abc", true))
+	assert.True(t, StartsWith("A", "abc", true))
 }
