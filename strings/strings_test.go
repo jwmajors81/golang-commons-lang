@@ -40,17 +40,17 @@ func TestCenter(t *testing.T) {
 	var tests = map[string]struct {
 		original       string
 		size           int
-		paddingChar    string
+		paddingChar    rune
 		expectedOutput string
 		expectedError  error
 	}{
-		"empty":                             {original: "", size: 4, paddingChar: " ", expectedOutput: "    ", expectedError: nil},
-		"negative size":                     {original: "ab", size: -1, paddingChar: " ", expectedOutput: "ab", expectedError: nil},
-		"size greater than length of input": {original: "ab", size: 4, paddingChar: " ", expectedOutput: " ab ", expectedError: nil},
-		"size less than length of input":    {original: "abcd", size: 2, paddingChar: " ", expectedOutput: "abcd", expectedError: nil},
-		"padding is space":                  {original: "a", size: 4, paddingChar: " ", expectedOutput: " a  ", expectedError: nil},
-		"padding is y":                      {original: "a", size: 4, paddingChar: "y", expectedOutput: "yayy", expectedError: nil},
-		"padding is yb":                     {original: "a", size: 4, paddingChar: "yb", expectedOutput: "", expectedError: errors.New("the padding character must have a length of 1")},
+		"empty":                             {original: "", size: 4, paddingChar: ' ', expectedOutput: "    ", expectedError: nil},
+		"negative size":                     {original: "ab", size: -1, paddingChar: ' ', expectedOutput: "ab", expectedError: nil},
+		"size greater than length of input": {original: "ab", size: 4, paddingChar: ' ', expectedOutput: " ab ", expectedError: nil},
+		"size less than length of input":    {original: "abcd", size: 2, paddingChar: ' ', expectedOutput: "abcd", expectedError: nil},
+		"padding is space":                  {original: "a", size: 4, paddingChar: ' ', expectedOutput: " a  ", expectedError: nil},
+		"padding is y":                      {original: "a", size: 4, paddingChar: 'y', expectedOutput: "yayy", expectedError: nil},
+		"padding is yb":                     {original: "a", size: 4, paddingChar: '\n', expectedOutput: "", expectedError: errors.New("the padding character must be a printable character as defined by unicode.IsPrint")},
 	}
 
 	for name, val := range tests {
@@ -71,16 +71,16 @@ func TestLeftPad(t *testing.T) {
 	var tests = map[string]struct {
 		original       string
 		size           int
-		paddingChar    string
+		paddingChar    rune
 		expectedOutput string
 		expectedError  error
 	}{
-		"empty":                                        {original: "", size: 3, paddingChar: " ", expectedOutput: "   ", expectedError: nil},
-		"negative size":                                {original: "ab", size: -1, paddingChar: " ", expectedOutput: "ab", expectedError: nil},
-		"size is same as length of input":              {original: "bat", size: 3, paddingChar: " ", expectedOutput: "bat", expectedError: nil},
-		"size is greater than length of input":         {original: "bat", size: 5, paddingChar: " ", expectedOutput: "  bat", expectedError: nil},
-		"size is less than length of input":            {original: "bat", size: 1, paddingChar: " ", expectedOutput: "bat", expectedError: nil},
-		"padding character's length is greater than 1": {original: "a", size: 4, paddingChar: "yb", expectedOutput: "", expectedError: errors.New("the padding character must have a length of 1")},
+		"empty":                                        {original: "", size: 3, paddingChar: ' ', expectedOutput: "   ", expectedError: nil},
+		"negative size":                                {original: "ab", size: -1, paddingChar: ' ', expectedOutput: "ab", expectedError: nil},
+		"size is same as length of input":              {original: "bat", size: 3, paddingChar: ' ', expectedOutput: "bat", expectedError: nil},
+		"size is greater than length of input":         {original: "bat", size: 5, paddingChar: ' ', expectedOutput: "  bat", expectedError: nil},
+		"size is less than length of input":            {original: "bat", size: 1, paddingChar: ' ', expectedOutput: "bat", expectedError: nil},
+		"padding character's length is greater than 1": {original: "a", size: 4, paddingChar: '\n', expectedOutput: "", expectedError: errors.New("the padding character must be a printable character as defined by unicode.IsPrint")},
 	}
 
 	for name, val := range tests {
@@ -101,16 +101,16 @@ func TestRightPad(t *testing.T) {
 	var tests = map[string]struct {
 		original       string
 		size           int
-		paddingChar    string
+		paddingChar    rune
 		expectedOutput string
 		expectedError  error
 	}{
-		"empty":                              {original: "", size: 3, paddingChar: " ", expectedOutput: "   ", expectedError: nil},
-		"negative size":                      {original: "ab", size: -1, paddingChar: " ", expectedOutput: "ab", expectedError: nil},
-		"same size":                          {original: "bat", size: 3, paddingChar: " ", expectedOutput: "bat", expectedError: nil},
-		"size greater than input":            {original: "bat", size: 5, paddingChar: " ", expectedOutput: "bat  ", expectedError: nil},
-		"size less than input":               {original: "bat", size: 1, paddingChar: " ", expectedOutput: "bat", expectedError: nil},
-		"padding greater than one character": {original: "a", size: 4, paddingChar: "yb", expectedOutput: "", expectedError: errors.New("the padding character must have a length of 1")},
+		"empty":                              {original: "", size: 3, paddingChar: ' ', expectedOutput: "   ", expectedError: nil},
+		"negative size":                      {original: "ab", size: -1, paddingChar: ' ', expectedOutput: "ab", expectedError: nil},
+		"same size":                          {original: "bat", size: 3, paddingChar: ' ', expectedOutput: "bat", expectedError: nil},
+		"size greater than input":            {original: "bat", size: 5, paddingChar: ' ', expectedOutput: "bat  ", expectedError: nil},
+		"size less than input":               {original: "bat", size: 1, paddingChar: ' ', expectedOutput: "bat", expectedError: nil},
+		"padding greater than one character": {original: "a", size: 4, paddingChar: '\n', expectedOutput: "", expectedError: errors.New("the padding character must be a printable character as defined by unicode.IsPrint")},
 	}
 
 	for name, val := range tests {
@@ -213,16 +213,33 @@ func TestSubstringWithLength(t *testing.T) {
 
 func TestChop(t *testing.T) {
 	assert.Equal(t, "", Chop(""))
-	assert.Equal(t, "abc", Chop("abc "))
-	assert.Equal(t, "abc ", Chop("abc \r"))
+	assert.Equal(t, "", Chop("a"))
 	assert.Equal(t, "abc ", Chop("abc \n"))
-	assert.Equal(t, "abc", Chop("abc\r\n"))
+	assert.Equal(t, "abc ", Chop("abc \n"))
+	assert.Equal(t, "abc ", Chop("abc \r\n"))
 	assert.Equal(t, "ab", Chop("abc"))
 	assert.Equal(t, "abc\nab", Chop("abc\nabc"))
 	assert.Equal(t, "", Chop("a"))
 	assert.Equal(t, "", Chop("\r"))
 	assert.Equal(t, "", Chop("\n"))
 	assert.Equal(t, "", Chop("\r\n"))
+
+}
+
+func TestRemoveLastSeparator(t *testing.T) {
+	assert.Equal(t, "", RemoveLastSeparator(""))
+	assert.Equal(t, "abc ", RemoveLastSeparator("abc "))
+	assert.Equal(t, "abc ", RemoveLastSeparator("abc \r"))
+	assert.Equal(t, "abc ", RemoveLastSeparator("abc \n"))
+	assert.Equal(t, "abc", RemoveLastSeparator("abc\r\n"))
+	assert.Equal(t, "abc\n", RemoveLastSeparator("abc\n\r"))
+	assert.Equal(t, "abc", RemoveLastSeparator("abc"))
+	assert.Equal(t, "abc\nabc", RemoveLastSeparator("abc\nabc"))
+	assert.Equal(t, "abc\nabc", RemoveLastSeparator("abc\nabc\n"))
+	assert.Equal(t, "a", RemoveLastSeparator("a"))
+	assert.Equal(t, "", RemoveLastSeparator("\r"))
+	assert.Equal(t, "", RemoveLastSeparator("\n"))
+	assert.Equal(t, "", RemoveLastSeparator("\r\n"))
 }
 
 func TestContainsNone(t *testing.T) {

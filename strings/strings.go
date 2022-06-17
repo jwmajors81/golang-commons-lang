@@ -5,6 +5,7 @@ import (
 	"math"
 	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/jwmajors81/golang-commons-lang/sorted"
 )
@@ -14,6 +15,9 @@ const (
 	CR = "\r"
 )
 
+// Abbreviates a String using ellipses.  This will turn
+// "It's a dangerous business, Frodo, going out your door" into
+// "It's a dangerous business..."
 func Abbreviate(value string, maxWidth int) (string, error) {
 	if maxWidth >= len(value) {
 		return value, nil
@@ -30,6 +34,8 @@ func Abbreviate(value string, maxWidth int) (string, error) {
 	return value, nil
 }
 
+// Appends the suffix to the end of the string if the string does not already
+// end with the suffix
 func AppendIfMissing(value string, suffix string, ignoreCase bool) string {
 	if ignoreCase {
 		if HasSuffixIgnoreCase(value, suffix) {
@@ -45,6 +51,7 @@ func AppendIfMissing(value string, suffix string, ignoreCase bool) string {
 
 }
 
+// Returns true if the string already ends with the specified suffix (case-insensitive)
 func HasSuffixIgnoreCase(value string, suffix string) bool {
 	valueLower := strings.ToLower(value)
 	suffixLower := strings.ToLower(suffix)
@@ -52,6 +59,7 @@ func HasSuffixIgnoreCase(value string, suffix string) bool {
 	return strings.HasSuffix(valueLower, suffixLower)
 }
 
+// Capitalizes a string by changing the first character to title case
 func Capitalize(value string) string {
 	firstLetter := Substr(value, 0, 1)
 	restOfValue := SubstrRight(value, 1)
@@ -59,10 +67,12 @@ func Capitalize(value string) string {
 	return strings.ToUpper(firstLetter) + restOfValue
 }
 
+// Returns the end of the string starting with the index specified
 func SubstrRight(input string, start int) string {
 	return Substr(input, start, len(input)-start)
 }
 
+// Returns the beginning of the string ending with the index specified
 func SubstrLeft(input string, end int) string {
 	if end <= 0 {
 		return ""
@@ -72,6 +82,7 @@ func SubstrLeft(input string, end int) string {
 	return Substr(input, 0, end)
 }
 
+// Returns the substring of the string based upon the start position and length required
 func Substr(input string, start int, length int) string {
 	asRunes := []rune(input)
 
@@ -86,24 +97,43 @@ func Substr(input string, start int, length int) string {
 	return string(asRunes[start : start+length])
 }
 
-func Chop(input string) string {
-	length := len(input)
-	if length < 2 {
+// Removes one new line from end of string if it's there.  New lines are considered:
+// \n, \r, or \r\n
+func RemoveLastSeparator(original string) string {
+	length := len(original)
+	if length == 0 {
 		return ""
 	}
 
-	newLength := length - 1
-
-	ret := Substr(input, 0, newLength)
-	lastCharacter := Substr(input, newLength, 1)
-	if lastCharacter == LF && SubstrRight(ret, newLength-1) == CR {
-		return Substr(ret, 0, newLength-1)
+	lastCharacter := Substr(original, length-1, 1)
+	if length > 1 && lastCharacter == LF && Substr(original, length-2, 1) == CR {
+		return Substr(original, 0, length-2)
+	} else if lastCharacter == LF {
+		return Substr(original, 0, length-1)
+	} else if lastCharacter == CR {
+		return Substr(original, 0, length-1)
 	}
 
-	return ret
+	return original
 }
 
-func Center(original string, size int, char string) (string, error) {
+// Remove the last character from a string
+func Chop(original string) string {
+	length := len(original)
+	if length < 1 {
+		return ""
+	}
+
+	lastCharacter := Substr(original, length-1, 1)
+	if length > 1 && lastCharacter == LF && Substr(original, length-2, 1) == CR {
+		return Substr(original, 0, length-2)
+	}
+
+	return Substr(original, 0, len(original)-1)
+}
+
+// Centers a string in a larger string
+func Center(original string, size int, char rune) (string, error) {
 	if size < 0 {
 		return original, nil
 	}
@@ -127,9 +157,10 @@ func Center(original string, size int, char string) (string, error) {
 
 }
 
-func LeftPad(original string, size int, char string) (string, error) {
-	if len(char) != 1 {
-		return "", errors.New("the padding character must have a length of 1")
+// Add padding to the left of the original string using the value specified
+func LeftPad(original string, size int, char rune) (string, error) {
+	if !unicode.IsPrint(char) {
+		return "", errors.New("the padding character must be a printable character as defined by unicode.IsPrint")
 	}
 
 	charNum := size - len(original)
@@ -137,25 +168,26 @@ func LeftPad(original string, size int, char string) (string, error) {
 		return original, nil
 	}
 
-	leftPad := strings.Repeat(char, charNum)
+	leftPad := strings.Repeat(string(char), charNum)
 	return leftPad + original, nil
 }
 
-func RightPad(original string, size int, char string) (string, error) {
-	if len(char) != 1 {
-		return "", errors.New("the padding character must have a length of 1")
+// Add padding to the right of the string using the value specified
+func RightPad(original string, size int, char rune) (string, error) {
+	if !unicode.IsPrint(char) {
+		return "", errors.New("the padding character must be a printable character as defined by unicode.IsPrint")
 	}
 
 	charNum := size - len(original)
-
 	if charNum < 0 {
 		return original, nil
 	}
 
-	rightPad := strings.Repeat(char, charNum)
+	rightPad := strings.Repeat(string(char), charNum)
 	return original + rightPad, nil
 }
 
+// Checks whether particular strings aren't found in a string
 func ContainsNone(original string, searchFor ...string) bool {
 	for _, val := range searchFor {
 		if len(val) == 0 {
@@ -167,6 +199,7 @@ func ContainsNone(original string, searchFor ...string) bool {
 	return true
 }
 
+// Checks whether the only values found in a string are those that are specified
 func ContainsOnly(original string, searchFor ...string) bool {
 	stringToSearch := original
 	for _, val := range searchFor {
@@ -176,6 +209,7 @@ func ContainsOnly(original string, searchFor ...string) bool {
 	return len(stringToSearch) == 0
 }
 
+// Finds the first non-empty string and returns the value if found, otherwise nil is returned
 func FirstNonEmpty(values ...string) *string {
 	for _, val := range values {
 		if len(val) > 0 {
@@ -193,6 +227,8 @@ func SafeDeref(value *string) string {
 	return *value
 }
 
+// Compares all strings and returns the initial sequence of chracters that are common
+// to all of the strings
 func CommonPrefix(values ...string) string {
 	if len(values) == 0 {
 		return ""
@@ -218,6 +254,7 @@ func CommonPrefix(values ...string) string {
 	return lastPrefix
 }
 
+// Returns all digits found in the string
 func GetDigits(original string) string {
 	r := regexp.MustCompile("[0-9]")
 	matches := r.FindAllString(original, -1)
@@ -228,6 +265,7 @@ func GetDigits(original string) string {
 	return strings.Join(matches, "")
 }
 
+// Search input for the first matching value found and returns the index of that value
 func IndexOfAny(original string, searchFor ...string) int {
 	for _, val := range searchFor {
 		if index := strings.Index(original, val); index > 0 {
@@ -237,6 +275,7 @@ func IndexOfAny(original string, searchFor ...string) int {
 	return -1
 }
 
+// Compares all values specified and returns the index where the values start to differ
 func IndexOfDifference(values ...string) int {
 	if len(values) == 0 {
 		return -1
@@ -264,6 +303,7 @@ func IndexOfDifference(values ...string) int {
 	return -1
 }
 
+// Retruns the length of all of the strings provided
 func LengthOfStrings(values ...string) []int {
 	var lengthOfValues []int
 	for _, val := range values {
@@ -273,10 +313,13 @@ func LengthOfStrings(values ...string) []int {
 	return lengthOfValues
 }
 
+// Finds the last index that matches the string that is provided and -1 if no matches are found
 func LastIndexOf(original string, searchFor string) int {
 	return LastIndexOfWithStartPos(original, searchFor, sorted.Max(0, len(original)))
 }
 
+// Finds the last index that matches the striung that is provided after the start position.
+// If no match is found then -1 is returned.
 func LastIndexOfWithStartPos(original string, searchFor string, startPosition int) int {
 	if startPosition > len(original) {
 		startPosition = len(original)
@@ -295,6 +338,7 @@ func LastIndexOfWithStartPos(original string, searchFor string, startPosition in
 	return -1
 }
 
+// Finds the latest index of any of the values specified within the original string
 func LastIndexOfAny(original string, searchFor ...string) int {
 	var results []int
 	for _, val := range searchFor {
@@ -304,6 +348,7 @@ func LastIndexOfAny(original string, searchFor ...string) int {
 	return sorted.Max(results...)
 }
 
+// Gets the rightmost 'x' characters of a string
 func Right(original string, length int) string {
 	if original == "" {
 		return ""
@@ -316,6 +361,7 @@ func Right(original string, length int) string {
 	return original[len(original)-length:]
 }
 
+// Rotate (circular shift) a string 'x' times based upon the input.
 func Rotate(original string, shift int) string {
 	if len(original) == 0 {
 		return original
@@ -347,6 +393,7 @@ func Rotate(original string, shift int) string {
 	return strings.Join(shifted, "")
 }
 
+// Determines whether one string starts within another string
 func StartsWith(searchFor string, searchIn string, ignoreCase bool) bool {
 	if len(searchFor) == 0 {
 		return false
@@ -372,6 +419,8 @@ func StartsWith(searchFor string, searchIn string, ignoreCase bool) bool {
 	return true
 }
 
+// Returns the substring of the original string after the first instance of the separate is found.
+// Returns an empty string if the value cannot be found.
 func SubstrAfter(original string, separator rune) string {
 	index := strings.IndexRune(original, separator)
 
@@ -382,6 +431,8 @@ func SubstrAfter(original string, separator rune) string {
 	return SubstrRight(original, index+1)
 }
 
+// Returns the substring of the original string after the last instance of the separate is found.
+// Returns an empty string if the value cannot be found.
 func SubstrAfterLast(original string, separator rune) string {
 
 	index := strings.LastIndexFunc(original, func(compareTo rune) bool {
@@ -395,6 +446,8 @@ func SubstrAfterLast(original string, separator rune) string {
 	return SubstrRight(original, index+1)
 }
 
+// Returns the substring of the original string before the first instance of the separate is found.
+// Returns an empty string if the value cannot be found.
 func SubstrBefore(original string, separator rune) string {
 	index := strings.IndexRune(original, separator)
 
