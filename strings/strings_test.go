@@ -371,3 +371,46 @@ func TestStartsWith(t *testing.T) {
 	assert.True(t, StartsWith("a", "abc", true))
 	assert.True(t, StartsWith("A", "abc", true))
 }
+
+func TestEndsWith(t *testing.T) {
+	assert.True(t, EndsWith("xyz", "abcxyz", false))
+	assert.False(t, EndsWith("xyz", "abcXYZ", false))
+	assert.True(t, EndsWith("xyz", "abcXYZ", true))
+	assert.False(t, EndsWith("xyz", "a", false))
+	assert.False(t, EndsWith("", "a", false))
+	assert.False(t, EndsWith("", "", false))
+	assert.False(t, EndsWith("x", "abc", false))
+}
+
+func TestTruncate(t *testing.T) {
+	assert.Equal(t, "abc", Truncate("abc", 4))
+	assert.Equal(t, "", Truncate("abc", -1))
+	assert.Equal(t, "a", Truncate("abc", 1))
+	assert.Equal(t, "abc", Truncate("abc", 3))
+}
+
+func TestTruncateWithOffset(t *testing.T) {
+	assert.Equal(t, "abc", TruncateWithOffset("abc", 0, 4))
+	assert.Equal(t, "", TruncateWithOffset("abc", 0, -1))
+	assert.Equal(t, "a", TruncateWithOffset("abc", 0, 1))
+	assert.Equal(t, "abc", TruncateWithOffset("abc", 0, 3))
+
+	assert.Equal(t, "", TruncateWithOffset("abc", 3, 4))
+	assert.Equal(t, "", TruncateWithOffset("abc", -1, -1))
+	assert.Equal(t, "ab", TruncateWithOffset("abc", -1, 2))
+	assert.Equal(t, "bc", TruncateWithOffset("abc", 1, 2))
+	assert.Equal(t, "bcxyz", TruncateWithOffset("abcxyz", 1, 5))
+	assert.Equal(t, "c", TruncateWithOffset("abc", 2, 1))
+}
+
+func TestUnwrap(t *testing.T) {
+	assert.Equal(t, "", Unwrap("", ""))
+	assert.Equal(t, "a", Unwrap("a", "a"))
+	assert.Equal(t, "", Unwrap("aa", "a"))
+	assert.Equal(t, "abc", Unwrap("/'abc/'", "/'"))
+	assert.Equal(t, "ABabcBA", Unwrap("AABabcBAA", "A"))
+	assert.Equal(t, "BabcB", Unwrap("AABabcBAA", "AA"))
+	assert.Equal(t, "A", Unwrap("A", "#"))
+	assert.Equal(t, "#A", Unwrap("#A", "#"))
+	assert.Equal(t, "A#", Unwrap("A#", "#"))
+}
