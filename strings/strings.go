@@ -419,6 +419,23 @@ func StartsWith(searchFor string, searchIn string, ignoreCase bool) bool {
 	return true
 }
 
+// Determines whether a string ends with another string value
+func EndsWith(searchFor string, searchIn string, ignoreCase bool) bool {
+	if len(searchFor) > len(searchIn) || len(searchFor) == 0 {
+		return false
+	}
+
+	if ignoreCase {
+		searchFor = strings.ToLower(searchFor)
+		searchIn = strings.ToLower(searchIn)
+	}
+
+	searchLength := len(searchFor)
+	searchInEnd := SubstrRight(searchIn, len(searchIn)-searchLength)
+
+	return searchInEnd == searchFor
+}
+
 // Returns the substring of the original string after the first instance of the separate is found.
 // Returns an empty string if the value cannot be found.
 func SubstrAfter(original string, separator rune) string {
@@ -456,4 +473,41 @@ func SubstrBefore(original string, separator rune) string {
 	}
 
 	return SubstrLeft(original, index)
+}
+
+// Returns a shortened version of the original string based upon the maxWidth defined.
+// This function will do bounds checking to ensure that no out of range errors occur.
+func Truncate(original string, maxWidth int) string {
+	return TruncateWithOffset(original, 0, maxWidth)
+}
+
+// Returns a shortened version of the original string, but the start of the string is
+// determined by the offset value.
+func TruncateWithOffset(original string, offset int, maxWidth int) string {
+	if maxWidth < 0 || offset >= len(original) {
+		return ""
+	}
+
+	if offset < 0 {
+		offset = 0
+	}
+
+	max := sorted.Min(len(original)-offset, maxWidth)
+
+	return original[offset : offset+max]
+}
+
+// Removes a series of characters from the begining and the end of the string
+// if they are present in both locations.
+func Unwrap(original string, wrapVal string) string {
+	if len(original) < len(wrapVal)*2 {
+		return original
+	}
+
+	if StartsWith(wrapVal, original, false) && EndsWith(wrapVal, original, false) {
+		length := len(wrapVal)
+		return original[length : len(original)-length]
+	}
+
+	return original
 }
